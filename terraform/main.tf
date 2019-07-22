@@ -20,7 +20,7 @@ data "scaleway_security_group" "default" {
 resource "scaleway_server" "opennebula-frontend" {
   name           = "OpenNebula"
   image          = "${data.scaleway_image.centos.id}"
-  type           = "DEV1-S"
+  type           = "${var.instance_type}"
   enable_ipv6    = true
   public_ip      = "${scaleway_ip.ip.ip}"
   security_group = "${data.scaleway_security_group.default.id}"
