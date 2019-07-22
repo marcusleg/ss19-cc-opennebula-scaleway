@@ -4,7 +4,7 @@ data "local_file" "public_key" {
   filename = "../secrets/id_rsa.pub"
 }
 
-resource "scaleway_ssh_key" "test" {
+resource "scaleway_ssh_key" "public_key" {
     key = "${data.local_file.public_key.content}"
 }
 
