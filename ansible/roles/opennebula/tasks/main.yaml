@@ -1,0 +1,49 @@
+- name: Disable SELinux (OpenNebula recommendation)
+  lineinfile:
+    path: /etc/selinux/config
+    regexp: '^SELINUX='
+    line: SELINUX=disabled
+  register: disable_selinux
+- name: Reboot
+  reboot:
+    reboot_timeout: 300
+  when: disable_selinux.changed
+- name: Copy yum repo file
+  copy:
+    src: files/opennebula.repo
+    dest: /etc/yum.repos.d/opennebula.repo
+    mode: 0600
+- name: Install dependencies
+  package:
+    name: ['epel-release', 'python2-pip']
+    state: present
+- name: Install OpenNebula
+  package:
+    name: ['opennebula', 'opennebula-server', 'opennebula-sunstone', 'opennebula-ruby', 'opennebula-java', 'python-pyone', 'opennebula-gate', 'opennebula-flow', 'opennebula-node-kvm', 'opennebula-common']
+    state: present
+# - name: Install Ruby gems
+#   gem:
+#     name: ['sqlite3', 'json', 'rack', 'sinatra', 'thin', 'amazon-ec2', 'azure', 'uuidtools', 'curb', 'mysql', 'sequel', 'net-ldap', 'treetop', 'parse-cron', 'aws-sdk']
+#     state: present
+- name: Install pexpect (required by Ansible)
+  pip:
+    name: pexpect
+- name: Install Ruby dependencies
+  expect:
+    command: /usr/share/one/install_gems
+    responses:
+      'Press enter to continue...': ''
+- name: Fetch login credentials
+  fetch:
+    src: /var/lib/one/.one/one_auth
+    dest: ../secrets/one_auth
+    flat: yes
+- name: Start OpenNebula
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items: ['opennebula', 'opennebula-sunstone']
+- name: Print Sunstone address
+  debug:
+    msg: Open http://{{ ansible_ssh_host }}:9869 in your browser

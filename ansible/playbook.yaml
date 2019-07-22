@@ -16,11 +16,12 @@
   vars:
     ansible_ssh_private_key_file: ../secrets/id_rsa
 
-  roles:
-  - yum-cron
-
   tasks:
   - name: Install several packages
     package:
       name: ['htop', 'nano']
       state: present
+
+  roles:
+  - yum-cron
+  - opennebula
