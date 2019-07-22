@@ -1,0 +1,24 @@
+- name: Install yum-cron
+  package:
+    name: ['yum-cron', 'libselinux-python']
+    state: present
+- name: Configure yum-cron to focus on security updates
+  lineinfile:
+    path: /etc/yum/yum-cron.conf
+    regexp: '^update_cmd = '
+    line: 'update_cmd = security'
+- name: Configure yum-cron to automatically download updates
+  lineinfile:
+    path: /etc/yum/yum-cron.conf
+    regexp: '^download_updates = '
+    line: 'download_updates = yes'
+- name: Configure yum-cron to automatically install updates
+  lineinfile:
+    path: /etc/yum/yum-cron.conf
+    regexp: '^apply_updates = '
+    line: 'apply_updates = yes'
+- name: Start and enable yum-cron
+  service:
+    name: yum-cron.service
+    state: started
+    enabled: yes
